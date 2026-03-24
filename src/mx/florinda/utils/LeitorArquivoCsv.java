@@ -21,7 +21,7 @@ public class LeitorArquivoCsv extends LeitorArquivo {
             return new ItemCardapio[0];
         }
 
-        String[] linhasConteudo = conteudoArquivo.split("\r\n");
+        String[] linhasConteudo = conteudoArquivo.split("\n");
         String[] conteudos;
 
         try {

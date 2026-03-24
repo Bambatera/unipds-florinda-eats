@@ -4,13 +4,15 @@ import mx.florinda.model.Cardapio;
 import mx.florinda.model.ItemCardapio;
 import mx.florinda.utils.ImpressoraCardapio;
 
-public class CardapioServices extends Cardapio {
+public class CardapioServices {
 
-    public CardapioServices(String nomeArquivo) {
-        super(nomeArquivo);
+    private final Cardapio cardapio;
+
+    public CardapioServices(Cardapio cardapio) {
+        this.cardapio = cardapio;
     }
 
-    public static void exibirOpcoes(Cardapio cardapio) {
+    public void exibirOpcoes() {
         int opcao;
         StringBuilder sb = new StringBuilder();
         sb.append("SELECIONE UMA OPÇÃO:").append("\n");
@@ -64,7 +66,7 @@ public class CardapioServices extends Cardapio {
         } while (opcao != 0);
     }
 
-    static void imprimirListagem(ItemCardapio[] itens, boolean somentePromocoes) {
+    private void imprimirListagem(ItemCardapio[] itens, boolean somentePromocoes) {
         IO.println("---------------------------");
         IO.println("MOSTRANDO ITENS DO CARDÁPIO");
         IO.println("---------------------------");
@@ -80,7 +82,7 @@ public class CardapioServices extends Cardapio {
         IO.println("---------------------------");
     }
 
-    static void imprimirItem(ItemCardapio[] itens, Integer idItem) {
+    private void imprimirItem(ItemCardapio[] itens, Integer idItem) {
         IO.println("---------------------------");
         IO.println("MOSTRANDO ITENS DO CARDÁPIO");
         IO.println("---------------------------");
@@ -88,7 +90,7 @@ public class CardapioServices extends Cardapio {
         IO.println("---------------------------");
     }
 
-    static void mostrarQtdeItensPromocao(ItemCardapio[] itens) {
+    private void mostrarQtdeItensPromocao(ItemCardapio[] itens) {
         int count = 0;
         IO.println("---------------------------");
         for (ItemCardapio item : itens) {
@@ -104,7 +106,7 @@ public class CardapioServices extends Cardapio {
         IO.println("---------------------------");
     }
 
-    static void valorTotalCardapio(ItemCardapio[] itens) {
+    private void valorTotalCardapio(ItemCardapio[] itens) {
         double valorTotal = 0;
         IO.println("---------------------------");
         for (ItemCardapio item : itens) {
