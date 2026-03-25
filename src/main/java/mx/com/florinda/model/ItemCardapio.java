@@ -11,6 +11,12 @@ public class ItemCardapio {
     private double precoComDesconto;
 
     public ItemCardapio(long id, String nome, String descricao, double preco, CategoriaCardapio categoria) {
+        if (preco <= 0d) {
+            throw new IllegalArgumentException("O preço do item deve ser maior que zero!");
+        }
+        if (categoria == null) {
+            throw new IllegalArgumentException("A categoria do item deve ser informada!");
+        }
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -47,6 +53,9 @@ public class ItemCardapio {
     }
 
     public void setPromocao(double precoComDesconto) {
+        if (precoComDesconto <= 0d) {
+            throw new IllegalArgumentException("O valor do desconto deve ser maior que zero!");
+        }
         this.emPromocao = true;
         this.precoComDesconto = precoComDesconto;
     }
