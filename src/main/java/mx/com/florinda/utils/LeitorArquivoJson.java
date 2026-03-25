@@ -1,7 +1,7 @@
-package mx.florinda.utils;
+package mx.com.florinda.utils;
 
 import com.google.gson.Gson;
-import mx.florinda.model.ItemCardapio;
+import mx.com.florinda.model.ItemCardapio;
 
 public class LeitorArquivoJson extends LeitorArquivo {
 

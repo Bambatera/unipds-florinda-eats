@@ -1,5 +1,5 @@
-import mx.florinda.cli.CardapioServices;
-import mx.florinda.model.Cardapio;
+import mx.com.florinda.cli.CardapioServices;
+import mx.com.florinda.model.Cardapio;
 
 void main() {
 
