@@ -1,8 +1,8 @@
-package mx.florinda.cli;
+package mx.com.florinda.cli;
 
-import mx.florinda.model.Cardapio;
-import mx.florinda.model.ItemCardapio;
-import mx.florinda.utils.ImpressoraCardapio;
+import mx.com.florinda.model.Cardapio;
+import mx.com.florinda.model.ItemCardapio;
+import mx.com.florinda.utils.ImpressoraCardapio;
 
 public class CardapioServices {
 

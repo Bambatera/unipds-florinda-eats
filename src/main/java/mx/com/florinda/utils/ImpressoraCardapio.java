@@ -1,6 +1,6 @@
-package mx.florinda.utils;
+package mx.com.florinda.utils;
 
-import mx.florinda.model.ItemCardapio;
+import mx.com.florinda.model.ItemCardapio;
 
 public class ImpressoraCardapio {
 

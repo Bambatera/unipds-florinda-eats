@@ -1,8 +1,8 @@
-package mx.florinda.utils;
+package mx.com.florinda.utils;
 
-import mx.florinda.model.CategoriaCardapio;
-import mx.florinda.model.ItemCardapio;
-import mx.florinda.model.ItemCardapioIsento;
+import mx.com.florinda.model.CategoriaCardapio;
+import mx.com.florinda.model.ItemCardapio;
+import mx.com.florinda.model.ItemCardapioIsento;
 
 public class LeitorArquivoCsv extends LeitorArquivo {
 

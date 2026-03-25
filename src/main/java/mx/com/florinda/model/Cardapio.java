@@ -1,7 +1,7 @@
-package mx.florinda.model;
+package mx.com.florinda.model;
 
-import mx.florinda.utils.LeitorArquivoCsv;
-import mx.florinda.utils.LeitorArquivoJson;
+import mx.com.florinda.utils.LeitorArquivoCsv;
+import mx.com.florinda.utils.LeitorArquivoJson;
 
 public class Cardapio {
 
