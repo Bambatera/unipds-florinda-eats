@@ -2,23 +2,21 @@ package mx.com.florinda.services;
 
 import mx.com.florinda.controller.Cardapio;
 import mx.com.florinda.model.ItemCardapio;
-import mx.com.florinda.utils.ImpressoraCardapio;
 
 import java.util.List;
 
-public class CardapioServices {
+public class CardapioService {
 
     private final Cardapio cardapio;
 
-    public CardapioServices(Cardapio cardapio) {
+    public CardapioService(Cardapio cardapio) {
         this.cardapio = cardapio;
     }
 
     public void exibirOpcoes() {
+        ImpressoraService.limparTela();
         int opcao;
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECIONE UMA OPÇÃO:").append("\n");
-        sb.append("--------------------").append("\n");
         sb.append("1. LISTAR CARDÁPIO").append("\n");
         sb.append("2. LISTAR ITEM CARDÁPIO").append("\n");
         sb.append("3. LISTAR ITENS EM PROMOÇÃO").append("\n");
@@ -30,10 +28,10 @@ public class CardapioServices {
         sb.append("> ");
 
         do {
-            try {
-                String selected = IO.readln(sb.toString());
+            String selected = IO.readln(ImpressoraService.imprimirMenu("SELECIONE UMA OPÇÃO:", sb));
+            if (selected != null && this.isNumeric(selected)) {
                 opcao = Integer.parseInt(selected);
-            } catch (NumberFormatException e) {
+            } else {
                 opcao = -1;
             }
 
@@ -42,8 +40,9 @@ public class CardapioServices {
                     imprimirListagem(cardapio.getItensCardapio(), false);
                     break;
                 case 2:
+                    ImpressoraService.limparTela();
                     String opcao2 = IO.readln("INFORME O NÚMERO DO ITEM: ");
-                    if (opcao2 == null || opcao2.trim().isEmpty()
+                    if (opcao2 == null || !isNumeric(opcao2)
                             || this.cardapio.getItensCardapio().size() < Integer.parseInt(opcao2)) {
                         IO.println("\n\nOPÇÃO INVÁLIDA!\n\n");
                         break;
@@ -54,9 +53,8 @@ public class CardapioServices {
                     imprimirListagem(cardapio.getItensCardapio(), true);
                     break;
                 case 4:
-                    IO.println("---------------------------");
-                    IO.println(String.format("EXISTEM %d ITENS NO CARDÁPIO", this.cardapio.getItensCardapio().size()));
-                    IO.println("---------------------------");
+                    IO.println("-".repeat(50));
+                    ImpressoraService.imprimirCorpo(String.format("EXISTEM %d ITENS NO CARDÁPIO", this.cardapio.getItensCardapio().size()));
                     break;
                 case 5:
                     mostrarQtdeItensPromocao(cardapio.getItensCardapio());
@@ -65,59 +63,63 @@ public class CardapioServices {
                     valorTotalCardapio(cardapio.getItensCardapio());
                     break;
                 default:
+                    ImpressoraService.limparTela();
                     if (opcao != 0) {
                         IO.println("\n\n*** OPÇÃO INVÁLIDA! ***\n\n");
+                    } else {
+                        ImpressoraService.imprimirCorpo("Encerrando programa...");
                     }
+                    ImpressoraService.pressEnter();
                     break;
             }
         } while (opcao != 0);
     }
 
     private void imprimirListagem(List<ItemCardapio> itens, boolean somentePromocoes) {
-        IO.println("---------------------------");
-        IO.println("MOSTRANDO ITENS DO CARDÁPIO");
-        IO.println("---------------------------");
+        ImpressoraService.limparTela();
+        ImpressoraService.imprimirTitulo("MOSTRANDO ITENS DO CARDÁPIO");
 
         for (ItemCardapio item : itens) {
             if (somentePromocoes && item.isEmPromocao()) {
-                IO.println(ImpressoraCardapio.criarImpressaoItem(item));
+                ImpressoraService.imprimirCorpo(item.toString());
             } else if (!somentePromocoes) {
-                IO.println(ImpressoraCardapio.criarImpressaoItem(item));
+                ImpressoraService.imprimirCorpo(item.toString());
             }
         }
 
-        IO.println("---------------------------");
+        ImpressoraService.pressEnter();
     }
 
     private void imprimirItem(List<ItemCardapio> itens, Integer idItem) {
-        IO.println("---------------------------");
-        IO.println("MOSTRANDO ITENS DO CARDÁPIO");
-        IO.println("---------------------------");
+        ImpressoraService.limparTela();
+
+        ImpressoraService.imprimirTitulo("MOSTRANDO ITENS DO CARDÁPIO");
         itens.stream().filter(item -> item.getId() == idItem)
                 .findFirst()
-                .ifPresent(item -> IO.println(ImpressoraCardapio.criarImpressaoItem(item)));
-        IO.println("---------------------------");
+                .ifPresent(item -> ImpressoraService.imprimirCorpo(item.toString()));
+
+        ImpressoraService.pressEnter();
     }
 
     private void mostrarQtdeItensPromocao(List<ItemCardapio> itens) {
-        int count = 0;
-        IO.println("---------------------------");
-        for (ItemCardapio item : itens) {
-            if (item.isEmPromocao()) {
-                count++;
-            }
-        }
+        long count = itens.stream().filter(ItemCardapio::isEmPromocao).count();
+        ImpressoraService.limparTela();
+
+        IO.println("-".repeat(50));
         if (count > 0) {
-            IO.println("EXISTEM " + count + " ITENS EM PROMOÇÃO");
+            ImpressoraService.imprimirCorpo(String.format("EXISTEM %d ITENS EM PROMOÇÃO", count));
         } else {
-            IO.println("NÃO HÁ ITENS EM PROMOÇÃO");
+            ImpressoraService.imprimirCorpo("NÃO HÁ ITENS EM PROMOÇÃO");
         }
-        IO.println("---------------------------");
+
+        ImpressoraService.pressEnter();
     }
 
     private void valorTotalCardapio(List<ItemCardapio> itens) {
-        double valorTotal = 0;
-        IO.println("---------------------------");
+        ImpressoraService.limparTela();
+
+        double valorTotal = 0d;
+        IO.println("-".repeat(50));
         for (ItemCardapio item : itens) {
             if (item.isEmPromocao()) {
                 valorTotal += item.getPrecoComDesconto();
@@ -125,7 +127,18 @@ public class CardapioServices {
                 valorTotal += item.getPreco();
             }
         }
-        IO.println("CARDÁPIO AVALIADO EM: " + valorTotal);
-        IO.println("---------------------------");
+        ImpressoraService.imprimirCorpo("CARDÁPIO AVALIADO EM: " + valorTotal);
+
+        ImpressoraService.pressEnter();
+    }
+
+
+    private boolean isNumeric(String texto) {
+        try {
+            Integer.parseInt(texto);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

@@ -71,4 +71,29 @@ public class ItemCardapio {
             return (this.preco * 0.1);
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(this.getId()).append("\n");
+        sb.append("NOME: ").append(this.getNome()).append("\n");
+        sb.append("DESCRIÇÃO: ").append(this.getDescricao()).append("\n");
+
+        if (this.isEmPromocao()) {
+            sb.append("ITEM EM PROMOÇÃO").append("\n");
+            sb.append("DE: ").append(this.getPreco()).append(" POR: ").append(this.getPrecoComDesconto()).append("\n");
+            sb.append((this.getPorcentagemDesconto() * 100)).append("% DE DESCONTO").append("\n");
+        } else {
+            sb.append("PREÇO: ").append(this.getPreco()).append("\n");
+        }
+
+        if (this.getImposto() > 0.00) {
+            sb.append("VALOR DO IMPOSTO: ").append(this.getImposto()).append("\n");
+        } else {
+            sb.append("ITEM ISENTO DE TRIBUTAÇÃO").append("\n");
+        }
+
+        sb.append("CATEGORIA: ").append(this.getCategoria()).append("\n");
+        return sb.toString();
+    }
 }
