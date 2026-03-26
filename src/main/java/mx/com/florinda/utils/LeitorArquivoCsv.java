@@ -4,6 +4,10 @@ import mx.com.florinda.model.CategoriaCardapio;
 import mx.com.florinda.model.ItemCardapio;
 import mx.com.florinda.model.ItemCardapioIsento;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class LeitorArquivoCsv extends LeitorArquivo {
 
     public LeitorArquivoCsv(String nomeArquivo) throws RuntimeException {
@@ -11,31 +15,32 @@ public class LeitorArquivoCsv extends LeitorArquivo {
     }
 
     @Override
-    public ItemCardapio[] getItensCardapio() {
+    public List<ItemCardapio> getItensCardapio() {
         return this.lerConteudo(super.getConteudo());
     }
 
-    private ItemCardapio[] lerConteudo(String conteudoArquivo) {
+    private List<ItemCardapio> lerConteudo(String conteudoArquivo) {
         if (conteudoArquivo.isEmpty()) {
             IO.println("Arquivo vazio!");
-            return new ItemCardapio[0];
+            return new ArrayList<>();
         }
 
         String[] linhasConteudo = conteudoArquivo.split("\n");
-        String[] conteudos;
+        List<String> conteudos = new ArrayList<>();
 
         try {
             Long.parseLong(linhasConteudo[0].split(",")[0]);
-            conteudos = linhasConteudo;
+            conteudos.addAll(Arrays.asList(linhasConteudo));
         } catch (NumberFormatException e) {
-            conteudos = new String[(linhasConteudo.length - 1)];
-            System.arraycopy(linhasConteudo, 1, conteudos, 0, linhasConteudo.length - 1);
+            for (int i = 1; i < linhasConteudo.length; i++) {
+                conteudos.add(linhasConteudo[i]);
+            }
         }
 
-        ItemCardapio[] itens = new ItemCardapio[conteudos.length];
+        List<ItemCardapio> itens = new ArrayList<>();
 
-        for (int i = 0; i < conteudos.length; i++) {
-            String[] atributos = conteudos[i].split(";");
+        for (String conteudo : conteudos) {
+            String[] atributos = conteudo.split(";");
 
             long id = Long.parseLong(atributos[0]);
             String nome = atributos[1];
@@ -56,7 +61,7 @@ public class LeitorArquivoCsv extends LeitorArquivo {
                 item.setPromocao(precoDesconto);
             }
 
-            itens[i] = item;
+            itens.add(item);
         }
 
         return itens;

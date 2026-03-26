@@ -5,6 +5,7 @@ import mx.com.florinda.model.ItemCardapio;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public abstract class LeitorArquivo {
 
@@ -30,5 +31,5 @@ public abstract class LeitorArquivo {
         return conteudo;
     }
 
-    public abstract ItemCardapio[] getItensCardapio();
+    public abstract List<ItemCardapio> getItensCardapio();
 }

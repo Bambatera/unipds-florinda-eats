@@ -3,6 +3,11 @@ package mx.com.florinda.utils;
 import com.google.gson.Gson;
 import mx.com.florinda.model.ItemCardapio;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class LeitorArquivoJson extends LeitorArquivo {
 
     public LeitorArquivoJson(String nomeArquivo) throws RuntimeException {
@@ -10,17 +15,20 @@ public class LeitorArquivoJson extends LeitorArquivo {
     }
 
     @Override
-    public ItemCardapio[] getItensCardapio() {
+    public List<ItemCardapio> getItensCardapio() {
         return this.lerConteudo(super.getConteudo());
     }
 
-    private ItemCardapio[] lerConteudo(String conteudo) {
+    @SuppressWarnings("unchecked")
+    private List<ItemCardapio> lerConteudo(String conteudo) {
         if (conteudo.isEmpty()) {
             IO.println("Arquivo vazio!");
-            return new ItemCardapio[0];
+            return new ArrayList<>();
         }
 
-        return new Gson().fromJson(conteudo, ItemCardapio[].class);
+        var itens = new Gson().fromJson(conteudo, ItemCardapio[].class);
+        List<ItemCardapio> itensCardapio = Arrays.stream(itens).collect(Collectors.toList());
+        return itensCardapio;
     }
 
 }
