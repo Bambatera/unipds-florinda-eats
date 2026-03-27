@@ -1,17 +1,15 @@
 package mx.com.florinda.utils;
 
-import mx.com.florinda.model.ItemCardapio;
+import mx.com.florinda.models.ItemCardapio;
+import mx.com.florinda.repositories.ItemCardapioRepository;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public abstract class LeitorArquivo {
 
     private final String conteudo;
 
-    public LeitorArquivo(String nomeArquivo) throws RuntimeException {
+    public LeitorArquivo(String nomeArquivo) {
         try {
             if (nomeArquivo == null || nomeArquivo.isEmpty()) {
                 throw new IllegalArgumentException("O nome do arquivo deve ser informado.");
@@ -20,9 +18,13 @@ public abstract class LeitorArquivo {
                     throw new IllegalArgumentException("Tipo de arquivo inválido " + nomeArquivo);
                 }
             }
-            Path arquivo = Path.of(nomeArquivo);
-            this.conteudo = Files.readString(arquivo);
-        } catch (IOException e) {
+//            Path arquivo = Path.of(nomeArquivo);
+            ItemCardapioRepository repository = new ItemCardapioRepository(nomeArquivo);
+//            this.conteudo = Files.readString(arquivo);
+            this.conteudo = repository.getConteudo();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
             throw new RuntimeException("Não foi possível ler o conteúdo do arquivo!");
         }
     }

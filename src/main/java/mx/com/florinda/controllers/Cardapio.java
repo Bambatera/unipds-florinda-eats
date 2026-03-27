@@ -1,6 +1,6 @@
-package mx.com.florinda.controller;
+package mx.com.florinda.controllers;
 
-import mx.com.florinda.model.ItemCardapio;
+import mx.com.florinda.models.ItemCardapio;
 import mx.com.florinda.utils.LeitorArquivoCsv;
 import mx.com.florinda.utils.LeitorArquivoJson;
 
@@ -14,7 +14,8 @@ public class Cardapio {
         if (nomeArquivo.endsWith("csv")) {
             this.itens = new LeitorArquivoCsv(nomeArquivo).getItensCardapio();
         } else if (nomeArquivo.endsWith("json")) {
-            this.itens = new LeitorArquivoJson(nomeArquivo).getItensCardapio();
+            LeitorArquivoJson leitor = new LeitorArquivoJson(nomeArquivo);
+            this.itens = leitor.getItensCardapio();
         } else {
             throw new IllegalArgumentException("Tipo de arquivo inválido " + nomeArquivo + "!");
         }

@@ -1,8 +1,8 @@
 package mx.com.florinda.utils;
 
-import mx.com.florinda.model.CategoriaCardapio;
-import mx.com.florinda.model.ItemCardapio;
-import mx.com.florinda.model.ItemCardapioIsento;
+import mx.com.florinda.models.CategoriaCardapio;
+import mx.com.florinda.models.ItemCardapio;
+import mx.com.florinda.models.ItemCardapioIsento;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,9 +32,7 @@ public class LeitorArquivoCsv extends LeitorArquivo {
             Long.parseLong(linhasConteudo[0].split(",")[0]);
             conteudos.addAll(Arrays.asList(linhasConteudo));
         } catch (NumberFormatException e) {
-            for (int i = 1; i < linhasConteudo.length; i++) {
-                conteudos.add(linhasConteudo[i]);
-            }
+            conteudos.addAll(Arrays.asList(linhasConteudo).subList(1, linhasConteudo.length));
         }
 
         List<ItemCardapio> itens = new ArrayList<>();

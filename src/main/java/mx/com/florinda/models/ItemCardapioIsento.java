@@ -1,4 +1,4 @@
-package mx.com.florinda.model;
+package mx.com.florinda.models;
 
 public class ItemCardapioIsento extends ItemCardapio {
 
