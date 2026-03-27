@@ -1,7 +1,7 @@
 package mx.com.florinda.services;
 
-import mx.com.florinda.controller.Cardapio;
-import mx.com.florinda.model.ItemCardapio;
+import mx.com.florinda.controllers.Cardapio;
+import mx.com.florinda.models.ItemCardapio;
 
 import java.util.List;
 
