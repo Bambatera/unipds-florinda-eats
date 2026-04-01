@@ -4,11 +4,11 @@ import mx.com.florinda.models.ItemCardapio;
 import mx.com.florinda.utils.LeitorArquivoCsv;
 import mx.com.florinda.utils.LeitorArquivoJson;
 
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Cardapio {
 
-    List<ItemCardapio> itens;
+    CopyOnWriteArrayList<ItemCardapio> itens;
 
     public Cardapio(String nomeArquivo) {
         if (nomeArquivo.endsWith("csv")) {
@@ -21,7 +21,7 @@ public class Cardapio {
         }
     }
 
-    public List<ItemCardapio> getItensCardapio() {
+    public CopyOnWriteArrayList<ItemCardapio> getItensCardapio() {
         return this.itens;
     }
 }

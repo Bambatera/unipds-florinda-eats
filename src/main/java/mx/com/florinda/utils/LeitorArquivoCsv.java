@@ -7,6 +7,7 @@ import mx.com.florinda.models.ItemCardapioIsento;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LeitorArquivoCsv extends LeitorArquivo {
 
@@ -15,14 +16,14 @@ public class LeitorArquivoCsv extends LeitorArquivo {
     }
 
     @Override
-    public List<ItemCardapio> getItensCardapio() {
+    public CopyOnWriteArrayList<ItemCardapio> getItensCardapio() {
         return this.lerConteudo(super.getConteudo());
     }
 
-    private List<ItemCardapio> lerConteudo(String conteudoArquivo) {
+    private CopyOnWriteArrayList<ItemCardapio> lerConteudo(String conteudoArquivo) {
         if (conteudoArquivo.isEmpty()) {
             IO.println("Arquivo vazio!");
-            return new ArrayList<>();
+            return new CopyOnWriteArrayList<>();
         }
 
         String[] linhasConteudo = conteudoArquivo.split("\n");
@@ -35,7 +36,7 @@ public class LeitorArquivoCsv extends LeitorArquivo {
             conteudos.addAll(Arrays.asList(linhasConteudo).subList(1, linhasConteudo.length));
         }
 
-        List<ItemCardapio> itens = new ArrayList<>();
+        CopyOnWriteArrayList<ItemCardapio> itens = new CopyOnWriteArrayList<>();
 
         for (String conteudo : conteudos) {
             String[] atributos = conteudo.split(";");
