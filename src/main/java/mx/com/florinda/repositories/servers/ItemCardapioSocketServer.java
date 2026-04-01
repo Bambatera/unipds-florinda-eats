@@ -10,14 +10,15 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ItemCardapioSocketServer {
 
     private static final Cardapio cardapio = new Cardapio("/databases/itens-cardapio.json");
-    private static List<ItemCardapio> itensCardapio = cardapio.getItensCardapio();
+    private static CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.getItensCardapio();
 
     static void main() throws Exception {
 
@@ -86,7 +87,12 @@ public class ItemCardapioSocketServer {
     }
 
     private static void addItemCardapio(String body) {
-        itensCardapio.add(new Gson().fromJson(body, ItemCardapio.class));
+        Long newId = itensCardapio.stream()
+                .map(ItemCardapio::getId)
+                .max(Long::compareTo)
+                .orElse(0L) + 1;
+        ItemCardapio itemCardapio = new Gson().fromJson(body, ItemCardapio.class);
+        itensCardapio.add(new ItemCardapio(newId, itemCardapio.getNome(), itemCardapio.getDescricao(), itemCardapio.getPreco(), itemCardapio.getCategoria()));
     }
 
     private static RequestHeader getRequestHeader(String request) {

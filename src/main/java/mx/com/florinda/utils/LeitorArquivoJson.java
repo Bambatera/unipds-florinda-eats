@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import mx.com.florinda.models.ItemCardapio;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class LeitorArquivoJson extends LeitorArquivo {
@@ -16,20 +15,20 @@ public class LeitorArquivoJson extends LeitorArquivo {
     }
 
     @Override
-    public List<ItemCardapio> getItensCardapio() {
+    public CopyOnWriteArrayList<ItemCardapio> getItensCardapio() {
         return this.lerConteudo(super.getConteudo());
     }
 
-    private List<ItemCardapio> lerConteudo(String conteudo) {
+    private CopyOnWriteArrayList<ItemCardapio> lerConteudo(String conteudo) {
         if (conteudo.isEmpty()) {
             IO.println("Arquivo vazio!");
-            return new ArrayList<>();
+            return new CopyOnWriteArrayList<>();
         }
 
         try {
             return Arrays
                     .stream(new Gson().fromJson(conteudo, ItemCardapio[].class))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
         } catch (JsonSyntaxException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
