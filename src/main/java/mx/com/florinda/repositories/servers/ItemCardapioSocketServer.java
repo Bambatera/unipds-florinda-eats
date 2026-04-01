@@ -7,21 +7,30 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ItemCardapioSocketServer {
 
     static void main() throws Exception {
 
-        try (ServerSocket serverSocket = new ServerSocket(8000)) {
-            IO.println("Servidor iniciado!");
+        try (ExecutorService executorService = Executors.newFixedThreadPool(50)) {
 
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                Thread thread = new Thread(() -> trataRequisicao(clientSocket));
-                thread.start();
+            try (ServerSocket serverSocket = new ServerSocket(8000)) {
+                IO.println("Servidor iniciado!");
+
+                while (true) {
+                    Socket clientSocket = serverSocket.accept();
+                    // Executa com threads infinitas
+//                    Thread thread = new Thread(() -> trataRequisicao(clientSocket));
+//                    thread.start();
+                    executorService.submit(() -> trataRequisicao(clientSocket)); // Executa com pool de threads
+                }
+
             }
 
         }
+
 
     }
 
