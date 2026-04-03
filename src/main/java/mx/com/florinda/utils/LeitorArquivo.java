@@ -1,7 +1,7 @@
 package mx.com.florinda.utils;
 
 import mx.com.florinda.models.ItemCardapio;
-import mx.com.florinda.repositories.ItemCardapioRepository;
+import mx.com.florinda.repositories.ItemCardapioInMemoryRepository;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public abstract class LeitorArquivo {
                 }
             }
 //            Path arquivo = Path.of(nomeArquivo);
-            ItemCardapioRepository repository = new ItemCardapioRepository(nomeArquivo);
+            ItemCardapioInMemoryRepository repository = new ItemCardapioInMemoryRepository(nomeArquivo);
 //            this.conteudo = Files.readString(arquivo);
             this.conteudo = repository.getConteudo();
         } catch (RuntimeException e) {

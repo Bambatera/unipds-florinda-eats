@@ -5,11 +5,11 @@ import mx.com.florinda.models.ItemCardapio;
 
 import java.util.List;
 
-public class CardapioService {
+public class CardapioInMemoryService {
 
     private final Cardapio cardapio;
 
-    public CardapioService(Cardapio cardapio) {
+    public CardapioInMemoryService(Cardapio cardapio) {
         this.cardapio = cardapio;
     }
 

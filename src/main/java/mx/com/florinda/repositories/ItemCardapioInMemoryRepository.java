@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ItemCardapioRepository {
+public class ItemCardapioInMemoryRepository {
 
     private String conteudo = "";
     private final String nomeArquivo;
 
-    public ItemCardapioRepository(String nomeArquivo) {
+    public ItemCardapioInMemoryRepository(String nomeArquivo) {
         if (nomeArquivo == null || nomeArquivo.isEmpty()) {
             throw new RuntimeException("A origem de dados deve ser informada!");
         }
