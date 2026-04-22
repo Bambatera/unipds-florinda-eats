@@ -1,4 +1,3 @@
-import mx.com.florinda.controllers.Cardapio;
 import mx.com.florinda.services.CardapioInMemoryService;
 import mx.com.florinda.services.ImpressoraService;
 
@@ -16,7 +15,8 @@ void main() {
 //        } while (nomeArquivo == null || nomeArquivo.trim().isEmpty());
 
 //        CardapioService cardapioServices = new CardapioService(new Cardapio(nomeArquivo));
-        CardapioInMemoryService cardapioServices = new CardapioInMemoryService(new Cardapio("/databases/itens-cardapio.json"));
+
+        CardapioInMemoryService cardapioServices = new CardapioInMemoryService();
         cardapioServices.exibirOpcoes();
     } catch (IllegalArgumentException e) {
         throw new RuntimeException(e);

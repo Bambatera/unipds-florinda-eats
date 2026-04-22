@@ -1,4 +1,4 @@
-package mx.com.florinda.repositories.servers;
+package mx.com.florinda.app.servers;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
@@ -18,7 +18,7 @@ public class ItemCardapioInMemoryServer {
 
         server.createContext("/itens-cardapio", exchange -> {
             Cardapio cardapio = new Cardapio("/databases/itens-cardapio.json");
-            CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.getItensCardapio();
+            CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.getItens();
             String json = new Gson().toJson(itensCardapio);
             byte[] bytes = json.getBytes();
 

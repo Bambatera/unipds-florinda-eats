@@ -1,33 +1,56 @@
 package mx.com.florinda.repositories;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import mx.com.florinda.controllers.Cardapio;
+import mx.com.florinda.models.ItemCardapio;
 
-public class ItemCardapioInMemoryRepository {
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-    private String conteudo = "";
-    private final String nomeArquivo;
+public class ItemCardapioInMemoryRepository implements Database {
 
-    public ItemCardapioInMemoryRepository(String nomeArquivo) {
-        if (nomeArquivo == null || nomeArquivo.isEmpty()) {
-            throw new RuntimeException("A origem de dados deve ser informada!");
-        }
-        this.nomeArquivo = nomeArquivo;
+    private static final Cardapio cardapio = new Cardapio("/databases/itens-cardapio.json");
+//    private static final Cardapio cardapio = new Cardapio("/databases/itens-cardapio.csv");
+
+    private static final CopyOnWriteArrayList<ItemCardapio> itens = cardapio.getItens();
+
+    public ItemCardapioInMemoryRepository() {
     }
 
-    public String getConteudo() {
-        if (!conteudo.isEmpty()) {
-            return conteudo;
+    @Override
+    public CopyOnWriteArrayList<ItemCardapio> listaItensCardapio() {
+        return itens;
+    }
+
+    @Override
+    public Optional<ItemCardapio> itemCardapioPorId(Long id) {
+        return itens.parallelStream().filter(item -> item.getId() == id).findFirst();
+    }
+
+    @Override
+    public boolean removeItemCardapio(Long id) {
+        if (this.itemCardapioPorId(id).isPresent()) {
+            this.itemCardapioPorId(id).ifPresent(this.itens::remove);
+            return true;
         }
-        try (InputStream is = this.getClass().getResourceAsStream(nomeArquivo)) {
-            if (is == null) {
-                throw new RuntimeException("ATENÇÃO: O recurso solicitação não possui dados!!!");
-            }
-            this.conteudo = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException("O recurso solicitado não foi encontrado!");
+        return false;
+    }
+
+    @Override
+    public boolean alteraPrecoItemCardapio(Long id, double novoPreco) {
+        if (this.itemCardapioPorId(id).isPresent()) {
+            this.itemCardapioPorId(id).ifPresent(item -> item.alterarPreco(novoPreco));
+            return true;
         }
-        return conteudo;
+        return false;
+    }
+
+    @Override
+    public int totalItensCardapio() {
+        return itens.size();
+    }
+
+    @Override
+    public void adicionaItemCardapio(ItemCardapio item) {
+        itens.add(item);
     }
 }

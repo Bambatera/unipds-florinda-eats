@@ -1,16 +1,16 @@
 package mx.com.florinda.services;
 
-import mx.com.florinda.controllers.Cardapio;
+import mx.com.florinda.models.CategoriaCardapio;
 import mx.com.florinda.models.ItemCardapio;
+import mx.com.florinda.repositories.ItemCardapioInMemoryRepository;
 
 import java.util.List;
 
 public class CardapioInMemoryService {
 
-    private final Cardapio cardapio;
+    private final ItemCardapioInMemoryRepository itemCardapioRepo = new ItemCardapioInMemoryRepository();
 
-    public CardapioInMemoryService(Cardapio cardapio) {
-        this.cardapio = cardapio;
+    public CardapioInMemoryService() {
     }
 
     public void exibirOpcoes() {
@@ -23,6 +23,9 @@ public class CardapioInMemoryService {
         sb.append("4. IMPRIMIR TAMANHO DO CARDÁPIO").append("\n");
         sb.append("5. IMPRIMIR QTDE DE ITENS EM PROMOÇÃO").append("\n");
         sb.append("6. VALOR TOTAL DOS PREÇOS").append("\n");
+        sb.append("7. REMOVER ITEM DO CARDÁPIO").append("\n");
+        sb.append("8. ATUALIZAR VALOR DO ITEM").append("\n");
+        sb.append("9. INCLUIR ITEM AO CARDÁPIO").append("\n");
         sb.append("0. FINALIZAR PROGRAMA").append("\n");
         sb.append("-------------------").append("\n");
         sb.append("> ");
@@ -37,30 +40,39 @@ public class CardapioInMemoryService {
 
             switch (opcao) {
                 case 1:
-                    imprimirListagem(cardapio.getItensCardapio(), false);
+                    imprimirListagem(this.itemCardapioRepo.listaItensCardapio(), false);
                     break;
                 case 2:
                     ImpressoraService.limparTela();
                     String opcao2 = IO.readln("INFORME O NÚMERO DO ITEM: ");
                     if (opcao2 == null || !isNumeric(opcao2)
-                            || this.cardapio.getItensCardapio().size() < Integer.parseInt(opcao2)) {
+                            || this.itemCardapioRepo.totalItensCardapio() < Integer.parseInt(opcao2)) {
                         IO.println("\n\nOPÇÃO INVÁLIDA!\n\n");
                         break;
                     }
-                    imprimirItem(cardapio.getItensCardapio(), Integer.parseInt(opcao2));
+                    imprimirItem(Integer.parseInt(opcao2));
                     break;
                 case 3:
-                    imprimirListagem(cardapio.getItensCardapio(), true);
+                    imprimirListagem(itemCardapioRepo.listaItensCardapio(), true);
                     break;
                 case 4:
                     IO.println("-".repeat(50));
-                    ImpressoraService.imprimirCorpo(String.format("EXISTEM %d ITENS NO CARDÁPIO", this.cardapio.getItensCardapio().size()));
+                    ImpressoraService.imprimirCorpo(String.format("EXISTEM %d ITENS NO CARDÁPIO", this.itemCardapioRepo.totalItensCardapio()));
                     break;
                 case 5:
-                    mostrarQtdeItensPromocao(cardapio.getItensCardapio());
+                    mostrarQtdeItensPromocao(itemCardapioRepo.listaItensCardapio());
                     break;
                 case 6:
-                    valorTotalCardapio(cardapio.getItensCardapio());
+                    valorTotalCardapio(itemCardapioRepo.listaItensCardapio());
+                    break;
+                case 7:
+                    removerItem();
+                    break;
+                case 8:
+                    atualizarValorItem();
+                    break;
+                case 9:
+                    incluirItem();
                     break;
                 default:
                     ImpressoraService.limparTela();
@@ -73,6 +85,76 @@ public class CardapioInMemoryService {
                     break;
             }
         } while (opcao != 0);
+    }
+
+    private void incluirItem() {
+        ImpressoraService.limparTela();
+        ItemCardapio itemCardapio = new ItemCardapio(
+            0,
+            IO.readln("INFORME O NOME DO ITEM: "),
+            IO.readln("INFORME A DESCRIÇÃO DO ITEM: "),
+            Double.parseDouble(IO.readln("INFORME O PREÇO DO ITEM: ")),
+            CategoriaCardapio.valueOf(IO.readln("INFORME A CATEGORIA: "))
+        );
+        this.itemCardapioRepo.adicionaItemCardapio(itemCardapio);
+        IO.println("\n\nITEM INCLUÍDO COM SUCESSO!\n\n");
+        ImpressoraService.pressEnter();
+        ImpressoraService.limparTela();
+    }
+
+    private void atualizarValorItem() {
+        ImpressoraService.limparTela();
+        String opcao = IO.readln("INFORME O NÚMERO DO ITEM: ");
+        if (opcao == null || !isNumeric(opcao)) {
+            IO.println("\n\n*** OPÇÃO INVÁLIDA! ***\n\n");
+            ImpressoraService.limparTela();
+            ImpressoraService.pressEnter();
+            return;
+        }
+
+        String valor = IO.readln("INFORME O NOVO VALOR DO ITEM: ");
+        if (valor == null || !isNumeric(valor)) {
+            IO.println("\n\n*** OPÇÃO INVÁLIDA! ***\n\n");
+            ImpressoraService.limparTela();
+            ImpressoraService.pressEnter();
+            return;
+        }
+
+        boolean updated = this.itemCardapioRepo.alteraPrecoItemCardapio(Long.parseLong(opcao), Double.parseDouble(valor));
+        if (updated) {
+            IO.println("\n\nVALOR ATUALIZADO COM SUCESSO!\n\n");
+        } else {
+            IO.println("\n\nITEM NÃO ENCONTRADO!\n\n");
+        }
+
+        ImpressoraService.limparTela();
+        ImpressoraService.pressEnter();
+    }
+
+    private void removerItem() {
+        ImpressoraService.limparTela();
+        String opcao = IO.readln("INFORME O NÚMERO DO ITEM: ");
+        if (opcao == null || !isNumeric(opcao)) {
+            IO.println("\n\n*** OPÇÃO INVÁLIDA! ***\n\n");
+            ImpressoraService.limparTela();
+            ImpressoraService.pressEnter();
+            return;
+        }
+
+        String confirma = IO.readln("CONFIRMAR REMOÇÃO DO ITEM " + opcao + "? (S/N): ");
+        if (confirma != null && confirma.equalsIgnoreCase("S")) {
+            boolean removed = this.itemCardapioRepo.removeItemCardapio(Long.parseLong(opcao));
+            if (removed) {
+                IO.println("\n\nITEM REMOVIDO COM SUCESSO!\n\n");
+            } else {
+                IO.println("\n\nITEM NÃO ENCONTRADO!\n\n");
+            }
+        } else {
+            IO.println("\n\nOPERAÇÃO CANCELADA!\n\n");
+        }
+
+        ImpressoraService.limparTela();
+        ImpressoraService.pressEnter();
     }
 
     private void imprimirListagem(List<ItemCardapio> itens, boolean somentePromocoes) {
@@ -90,14 +172,13 @@ public class CardapioInMemoryService {
         ImpressoraService.pressEnter();
     }
 
-    private void imprimirItem(List<ItemCardapio> itens, Integer idItem) {
+    private void imprimirItem(Integer idItem) {
         ImpressoraService.limparTela();
 
         ImpressoraService.imprimirTitulo("MOSTRANDO ITENS DO CARDÁPIO");
-        itens.stream().filter(item -> item.getId() == idItem)
-                .findFirst()
-                .ifPresent(item -> ImpressoraService.imprimirCorpo(item.toString()));
-
+        itemCardapioRepo.itemCardapioPorId(idItem.longValue()).ifPresentOrElse(
+                item -> ImpressoraService.imprimirCorpo(item.toString()),
+                () -> ImpressoraService.imprimirCorpo("ITEM NÃO ENCONTRADO!"));
         ImpressoraService.pressEnter();
     }
 
@@ -132,13 +213,13 @@ public class CardapioInMemoryService {
         ImpressoraService.pressEnter();
     }
 
-
     private boolean isNumeric(String texto) {
         try {
-            Integer.parseInt(texto);
+            Double.parseDouble(texto);
             return true;
         } catch (NumberFormatException e) {
             return false;
         }
     }
+
 }

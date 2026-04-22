@@ -1,4 +1,4 @@
-package mx.com.florinda.repositories.servers;
+package mx.com.florinda.app.servers;
 
 import com.google.gson.Gson;
 import mx.com.florinda.controllers.Cardapio;
@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,25 +17,19 @@ import java.util.concurrent.Executors;
 public class ItemCardapioSocketServer {
 
     private static final Cardapio cardapio = new Cardapio("/databases/itens-cardapio.json");
-    private static CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.getItensCardapio();
+    private static final CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.getItens();
 
     static void main() throws Exception {
 
         try (ExecutorService executorService = Executors.newFixedThreadPool(50)) {
-
             try (ServerSocket serverSocket = new ServerSocket(8000)) {
                 IO.println("Servidor iniciado!");
-
                 while (true) {
                     Socket clientSocket = serverSocket.accept();
                     executorService.submit(() -> trataRequisicao(clientSocket));
                 }
-
             }
-
         }
-
-
     }
 
     private static void trataRequisicao(Socket clientSocket) {
@@ -87,7 +80,7 @@ public class ItemCardapioSocketServer {
     }
 
     private static void addItemCardapio(String body) {
-        Long newId = itensCardapio.stream()
+        long newId = itensCardapio.stream()
                 .map(ItemCardapio::getId)
                 .max(Long::compareTo)
                 .orElse(0L) + 1;

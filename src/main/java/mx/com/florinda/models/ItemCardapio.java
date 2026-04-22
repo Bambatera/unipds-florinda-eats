@@ -4,7 +4,7 @@ public class ItemCardapio {
     private final long id;
     private final String nome;
     private final String descricao;
-    private final double preco;
+    private double preco;
     private final CategoriaCardapio categoria;
 
     private boolean emPromocao;
@@ -70,6 +70,14 @@ public class ItemCardapio {
         } else {
             return (this.preco * 0.1);
         }
+    }
+
+    public void alterarPreco(double novoPreco) {
+        if (novoPreco <= 0d) {
+            IO.println("O preço do item deve ser maior que zero!");
+            return;
+        }
+        this.preco = novoPreco;
     }
 
     @Override

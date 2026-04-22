@@ -21,7 +21,7 @@ public class Cardapio {
         }
     }
 
-    public CopyOnWriteArrayList<ItemCardapio> getItensCardapio() {
-        return this.itens;
+    public CopyOnWriteArrayList<ItemCardapio> getItens() {
+        return itens;
     }
 }

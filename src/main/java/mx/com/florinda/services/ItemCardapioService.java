@@ -14,7 +14,7 @@ public class ItemCardapioService {
     private static final Cardapio cardapio = new Cardapio("/databases/itens-cardapio.csv");
 
     static void main() throws IOException {
-        List<ItemCardapio> itensCardapio = cardapio.getItensCardapio();
+        List<ItemCardapio> itensCardapio = cardapio.getItens();
         String itensJson = new Gson().toJson(itensCardapio);
 
         Path path = Path.of("itens-cardapio.json");
