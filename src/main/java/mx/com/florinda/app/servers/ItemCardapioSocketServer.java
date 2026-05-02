@@ -13,9 +13,12 @@ import java.net.Socket;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ItemCardapioSocketServer {
 
+    private static final Logger logger = Logger.getLogger(ItemCardapioSocketServer.class.getName());
     private static final Cardapio cardapio = new Cardapio("/databases/itens-cardapio.json");
     private static final CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.getItens();
 
@@ -23,7 +26,7 @@ public class ItemCardapioSocketServer {
 
         try (ExecutorService executorService = Executors.newFixedThreadPool(50)) {
             try (ServerSocket serverSocket = new ServerSocket(8000)) {
-                IO.println("Servidor iniciado!");
+                logger.info("Servidor iniciado!");
                 while (true) {
                     Socket clientSocket = serverSocket.accept();
                     executorService.submit(() -> trataRequisicao(clientSocket));
@@ -44,7 +47,8 @@ public class ItemCardapioSocketServer {
             } while (clientIS.available() > 0);
 
             String request = requestBuilder.toString();
-            IO.println("Requisição recebida: " + request);
+            logger.finest(request);
+            logger.fine("\n\nChegou nova requisição");
 
             Thread.sleep(250);
 
@@ -53,28 +57,42 @@ public class ItemCardapioSocketServer {
             OutputStream clientOS = clientSocket.getOutputStream();
             PrintStream clientOut = new PrintStream(clientOS);
 
-            if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio")) {
-                getItensCardapio(clientOut);
-            } else if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio/total")) {
-                getCardapioSize(clientOut);
-            } else if (rh.method().equals("POST") && rh.requestURI().equals("/itens-cardapio")) {
-                String[] requestChuncks = request.split("\r\n\r\n");
-                if (requestChuncks.length == 1) {
-                    clientOut.println("HTTP/1.1 400 Bad Request");
-                    clientOut.println();
-                    return;
-                }
+            try {
 
-                String body = requestChuncks[1];
-                addItemCardapio(body);
-                clientOut.println("HTTP/1.1 201 Created");
+                if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio")) {
+                    getItensCardapio(clientOut);
+                } else if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio/total")) {
+                    getCardapioSize(clientOut);
+                } else if (rh.method().equals("POST") && rh.requestURI().equals("/itens-cardapio")) {
+                    String[] requestChuncks = request.split("\r\n\r\n");
+                    if (requestChuncks.length == 1) {
+                        clientOut.println("HTTP/1.1 400 Bad Request");
+                        clientOut.println();
+                        return;
+                    }
+
+                    String body = requestChuncks[1];
+                    addItemCardapio(body);
+                    clientOut.println("HTTP/1.1 201 Created");
+                    clientOut.println();
+                } else {
+                    clientOut.println("HTTP/1.1 404 Not Found");
+                    clientOut.println();
+                    logger.warning(() -> "URI não encontrada: " + rh.requestURI());
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, e, () -> "Erro ao tratar " + rh.method() + " " + rh.requestURI());
+
+                clientOut.println("HTTP/1.1 500 Internal Server Error");
                 clientOut.println();
-            } else {
-                clientOut.println("HTTP/1.1 404 Not Found");
-                clientOut.println();
+                clientOut.println(e.getMessage());
+
+                throw new RuntimeException(e);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
+//            logger.severe("Erro no servidor.");
+            logger.log(Level.SEVERE, "Erro no servidor.", e);
             throw new RuntimeException(e);
         }
     }
@@ -97,6 +115,12 @@ public class ItemCardapioSocketServer {
 
         String method = requestLineChuncks[0];
         String requestURI = requestLineChuncks[1];
+        String httpVersion = requestLineChuncks[2];
+
+        logger.finer(() -> "Method: " + method);
+        logger.finer(() -> "Request URI: " + requestURI);
+        logger.finer(() -> "HTTP Version: " + httpVersion);
+
         return new RequestHeader(method, requestURI);
     }
 
