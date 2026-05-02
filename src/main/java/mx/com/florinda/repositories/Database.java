@@ -15,7 +15,7 @@ public interface Database {
 
     boolean alteraPrecoItemCardapio(Long id, double novoPreco);
 
-    int totalItensCardapio();
+    long totalItensCardapio();
 
     void adicionaItemCardapio(ItemCardapio item);
 

@@ -45,7 +45,7 @@ public class ItemCardapioInMemoryRepository implements Database {
     }
 
     @Override
-    public int totalItensCardapio() {
+    public long totalItensCardapio() {
         return itens.size();
     }
 
