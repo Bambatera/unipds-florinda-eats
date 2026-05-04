@@ -4,11 +4,10 @@ import com.google.gson.Gson;
 import mx.com.florinda.models.ItemCardapio;
 import mx.com.florinda.repositories.SQLDatabase;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.time.YearMonth;
 import java.time.ZonedDateTime;
@@ -39,6 +38,9 @@ public class ItemCardapioSocketServer {
                 }
             }
         }
+    }
+
+    private record RequestHeader(String method, String requestURI, String mediaType) {
     }
 
     private static void trataRequisicao(Socket clientSocket) {
@@ -76,7 +78,7 @@ public class ItemCardapioSocketServer {
                     clientOut.print("\r\n");
 
                 } else if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio")) {
-                    getItensCardapio(clientOut);
+                    getItensCardapio(clientOS, rh.mediaType);
                 } else if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio/total")) {
                     getCardapioSize(clientOut);
                 } else if (rh.method().equals("POST") && rh.requestURI().equals("/itens-cardapio")) {
@@ -194,15 +196,23 @@ public class ItemCardapioSocketServer {
         String method = requestLineChuncks[0];
         String requestURI = requestLineChuncks[1];
         String httpVersion = requestLineChuncks[2];
+        String mediaType = "application/json";
+
+        for (int i = 1; i < requestLineAndHeadersChuncks.length; i++) {
+            String header = requestLineAndHeadersChuncks[i];
+            logger.finer(() -> "Header: " + header);
+            if (header.contains("Accept")) {
+                mediaType = header.replace("Accept: ", "");
+            }
+        }
 
         logger.finer(() -> "Method: " + method);
+        String finalMediaType = mediaType;
+        logger.finer(() -> "Accept: " + finalMediaType);
         logger.finer(() -> "Request URI: " + requestURI);
         logger.finer(() -> "HTTP Version: " + httpVersion);
 
-        return new RequestHeader(method, requestURI);
-    }
-
-    private record RequestHeader(String method, String requestURI) {
+        return new RequestHeader(method, requestURI, mediaType);
     }
 
     private static void getCardapioSize(PrintStream clientOut) {
@@ -212,13 +222,22 @@ public class ItemCardapioSocketServer {
         clientOut.println(itensCardapio.size());
     }
 
-    private static void getItensCardapio(PrintStream clientOut) {
-        String json = new Gson().toJson(itensCardapio);
+    private static void getItensCardapio(OutputStream clientOS, String mediaType) throws IOException {
+        byte[] body;
 
-        clientOut.println("HTTP/1.1 200 OK");
-        clientOut.println("Content-Type: application/json; charset=UTF-8");
-        clientOut.println();
-        clientOut.println(json);
+        if ("application/x-java-serialized-object".equals(mediaType)) {
+            var bos = new ByteArrayOutputStream();
+            var oos = new ObjectOutputStream(bos);
+            oos.writeObject(itensCardapio);
+            body = bos.toByteArray();
+        } else {
+            String json = new Gson().toJson(itensCardapio);
+            body = json.getBytes(StandardCharsets.UTF_8);
+        }
+
+        clientOS.write("HTTP/1.1 200 OK\r\n".getBytes(StandardCharsets.UTF_8));
+        clientOS.write(("Content-Type: "+ mediaType +"; charset=UTF-8\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+        clientOS.write(body);
     }
 
 }

@@ -1,6 +1,9 @@
 package mx.com.florinda.models;
 
-public class ItemCardapio {
+import java.io.Serializable;
+
+public class ItemCardapio implements Serializable {
+
     private final long id;
     private final String nome;
     private final String descricao;
