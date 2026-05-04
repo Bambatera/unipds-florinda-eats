@@ -1,15 +1,21 @@
 package mx.com.florinda.app.servers;
 
 import com.google.gson.Gson;
-import mx.com.florinda.controllers.Cardapio;
 import mx.com.florinda.models.ItemCardapio;
+import mx.com.florinda.repositories.SQLDatabase;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.NumberFormat;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,8 +25,8 @@ import java.util.logging.Logger;
 public class ItemCardapioSocketServer {
 
     private static final Logger logger = Logger.getLogger(ItemCardapioSocketServer.class.getName());
-    private static final Cardapio cardapio = new Cardapio("/databases/itens-cardapio.json");
-    private static final CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.getItens();
+    private static final SQLDatabase cardapio = new SQLDatabase(); //Cardapio cardapio = new Cardapio("/databases/itens-cardapio.json");
+    private static final CopyOnWriteArrayList<ItemCardapio> itensCardapio = cardapio.listaItensCardapio();//cardapio.getItens();
 
     static void main() throws Exception {
 
@@ -59,7 +65,17 @@ public class ItemCardapioSocketServer {
 
             try {
 
-                if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio")) {
+                if (rh.method().equals("GET") && (rh.requestURI().equals("/") || rh.requestURI().equals("/en"))) {
+
+                    Locale locale = (rh.requestURI().equals("/en")) ? Locale.US : Locale.of("pt", "BR");
+
+                    clientOut.print("HTTP/1.1 200 OK\r\n");
+                    clientOut.print("Content-Type: text/html; charset=UTF-8\r\n\r\n");
+                    clientOut.print("\r\n");
+                    clientOut.print(createHtml(locale));
+                    clientOut.print("\r\n");
+
+                } else if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio")) {
                     getItensCardapio(clientOut);
                 } else if (rh.method().equals("GET") && rh.requestURI().equals("/itens-cardapio/total")) {
                     getCardapioSize(clientOut);
@@ -74,7 +90,6 @@ public class ItemCardapioSocketServer {
                     String body = requestChuncks[1];
                     addItemCardapio(body);
                     clientOut.println("HTTP/1.1 201 Created");
-                    clientOut.println();
                 } else {
                     clientOut.println("HTTP/1.1 404 Not Found");
                     clientOut.println();
@@ -95,6 +110,69 @@ public class ItemCardapioSocketServer {
             logger.log(Level.SEVERE, "Erro no servidor.", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static String createHtml(Locale locale) {
+        NumberFormat formatadorMoeda = NumberFormat.getCurrencyInstance(locale);
+        ResourceBundle mensagens = ResourceBundle.getBundle("mensagens", locale);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG).withLocale(locale);
+        DateTimeFormatter anoMesFormatter = DateTimeFormatter.ofPattern("MMMM/yyyy").withLocale(locale);
+
+        // Percorre os itens e monta o "article" para a exibição.
+        StringBuilder itens = new StringBuilder();
+        itensCardapio.forEach(item -> {
+            String precoItem;
+            if (item.isEmPromocao()) {
+                precoItem = String.format("<mark>Em promoção</mark> <strong>%s</strong> <s>%s</s>", formatadorMoeda.format(item.getPrecoComDesconto()), formatadorMoeda.format(item.getPreco()));
+            } else {
+                precoItem = String.format("<strong>%s</strong>", formatadorMoeda.format(item.getPreco()));
+            }
+
+            String categoria = mensagens.getString("categoria.cardapio." + item.getCategoria().name().toLowerCase());
+
+            itens.append("""
+                    <article>
+                        <kbd>%s</kbd>
+                        <h3>%s</h3>
+                        <p>%s</p>
+                        %s
+                    </article>
+                    """.formatted(categoria, item.getNome(), item.getDescricao(), precoItem));
+        });
+
+        // Monta o corpo padrão do HTML
+        String html = """
+                <!DOCTYPE html>
+                <html lang="ptBR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Florinda Eats - Cardápio</title>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
+                </head>
+                <body>
+                
+                <header class="container">
+                    <hgroup>
+                        <h1>Florinda Eats</h1>
+                        <p>O sabor da Vila direto pra você</p>
+                    </hgroup>
+                </header>
+                
+                <main class="container">
+                    <h2>Cardápio</h2>
+                
+                %s
+                
+                </main>
+                
+                <footer class="container">
+                    <p><small><em>Preços de acordo com %s</em></small></p>
+                    <p><strong>Florinda Eats</strong> Todos os direitos reservados - setembro/2025</p>
+                </footer>
+                </body>
+                </html>
+                """;
+        return html.formatted(itens.toString(), dateTimeFormatter.format(ZonedDateTime.now()), anoMesFormatter.format(YearMonth.now()));
     }
 
     private static void addItemCardapio(String body) {
@@ -142,4 +220,5 @@ public class ItemCardapioSocketServer {
         clientOut.println();
         clientOut.println(json);
     }
+
 }
